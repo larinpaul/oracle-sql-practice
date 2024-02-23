@@ -103,3 +103,49 @@ SELECT Столбец1, Столбец2, Столбец3
 -- Маракасы D 40
 -- Арфа A 10
 -- Пианино E 50
+
+
+-- 2024 02 24 
+
+-- ЗАДАЧА 2
+-- Найдите ошибку в SQL запросе
+
+SELECT
+    ID_ITEM,
+    NAME_ITEM,
+    EXTRACT(YEAR FROM DATE_IMPORT) AS YEAR_IMPORT
+FROM Table1
+WHERE YEAR_IMPORT > 2010;
+
+-- Ошибки:
+
+-- WHERE выполняется до того, как столбцу будет присвоен псевдоним (alias),
+-- а это невозможно, псевдомним в запросе всегда присваивается последним.
+-- Поэтому псевдоним (alias) во WHERE еще использовать нельзя!
+
+-- Как исправить:
+-- Начнем с того, что будем через WHERE проверять не alias, а само значение
+SELECT
+    ID_ITEM,
+    NAME_ITEM,
+    EXTRACT(YEAR FROM DATE_IMPORT) AS YEAR_IMPORT
+FROM Table1
+WHERE EXTRACT(YEAR FROM DATE_IMPORT) > 2010;
+
+-- Только в блоке ORDER BY можно использовать alias,
+-- то есть использовать данное нами имя столбца.
+-- Потому что данные уже отфильтрованы с помощью WHERE,
+-- они, если нужно, сгруппированы, преобразованы к нужному виду,
+-- всё, что нужно, уже сделано.
+-- Осталось, если нужно, только отсортировать...
+-- Вот только в вблоке ORDER BY можно использовать элиас столбца.
+SELECT
+    ID_ITEM,
+    NAME_ITEM,
+    EXTRACT(YEAR FROM DATE_IMPORT) AS YEAR_IMPORT
+FROM Table1
+WHERE EXTRACT(YEAR FROM DATE_IMPORT) > 2010
+ORDER BY YEAR_IMPORT;
+
+
+
