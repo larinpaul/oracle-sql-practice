@@ -148,4 +148,41 @@ WHERE EXTRACT(YEAR FROM DATE_IMPORT) > 2010
 ORDER BY YEAR_IMPORT;
 
 
+-- 2024 02 24
 
+-- ЗАДАЧА 3
+-- В чём разница между WHERE и HAVING?:
+
+-- WHERE нужен, чтобы наскалывать условие на весь набор данных
+SELECT  c.ID_CLIENT,
+        s.DATE_SALE,
+        s.SUM_PAYMENT
+    FROM Clients c
+    JOIN Sales s
+    ON s.ID_CLIENT = c.ID_CLIENT
+    WHERE s.DATE_SALE BETWEEN to_date('01.01.2019', 'dd.mm.yyyy') AND to_date('31.12.2019', 'dd.mm.yyyy');
+
+-- Тееперь будем подбираться к вопросу HAVING:
+
+-- Теперь выведем сумму продаж по каждому клиенту,
+-- т.е. по каждому клиенту число выведется только один раз
+SELECT c.ID_CLIENT
+        SUM(s.SUM_PAYMENT) AS TOTAL_SUM
+    FROM Clients c
+    JOIN Sales s
+    ON s.ID_CLIENT = c.ID_CLIENT
+    WHERE s.DATE_SALE BETWEEN to_date('0.01.2019','dd.mmm.yyyy') AND to_date('31.12.2019','dd.mm.yyyy')
+    GROUP BY c.ID_CLIENT;
+
+-- С другой стороны, HAVING нужен для проверки отдельных данных.
+-- Например, мы можем посмотреть по каждой сумме по каждому клиенту
+-- HAVING нужен, чтобы фильтровать данные по сгруппированной информации
+-- Не на момент набора данных, а когда данные уже получены
+SELECT c.ID_CLIENT,
+        SUM(s.SUM_PAYMENT) AS TOTAL_SUM
+        FROM Clients c
+        JOIN Sales s
+        ON s.ID_CLIENT = c.ID_CLIENT
+        WHERE s.DATE_SALE BETWEEN to_date('01.01.2019','dd.mm.yyyy') AND to_date('31.12.2019','dd.mm.yyyy')
+        GROUP BY c.ID_CLIENT
+        HAVING SUM(s.SUM_PAYMENT) > 1000000
