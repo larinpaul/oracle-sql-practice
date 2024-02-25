@@ -186,3 +186,24 @@ SELECT c.ID_CLIENT,
         WHERE s.DATE_SALE BETWEEN to_date('01.01.2019','dd.mm.yyyy') AND to_date('31.12.2019','dd.mm.yyyy')
         GROUP BY c.ID_CLIENT
         HAVING SUM(s.SUM_PAYMENT) > 1000000
+
+
+--2024 02 25 -- 13:24
+
+-- ЗАДАЧА 4
+-- Какие типы соединений таблиц вы знаете?
+
+-- INNER JOIN
+-- LEFT JOIN -- то же что и LEFT OUTER JOIN
+-- RIGHT JOIN -- то же что и RIGHT OUTER JOIN
+-- CROSS JOIN
+-- FULL JOIN -- Сперва сделает INNER JOIN, затем LEFT JOIN, затем RIGHT JOIN
+
+
+-- ЗАДАЧА 5
+-- Какие команды DML вы знаете?
+-- DML это команды манипуляции с данными, их всего 4:
+-- SELECT
+-- INSERT
+-- UPDATE
+-- DELETE
