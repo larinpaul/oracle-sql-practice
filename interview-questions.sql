@@ -82,3 +82,40 @@ select ename, job, sal, grade
             on e.sal between losal and hisal;
 
 -- П.С. INNER JOIN является дефолтным, а не LEFT JOIN
+
+
+-- 2024 03 07
+
+-- Часть 3
+
+-- Задание 1
+-- Определите, кто из служащих в каждом из отделов был зачислен на работу последним по времени.
+-- Результаты упорядочие по дате зачисления.
+-- Вывести в результирующие столбцы: deptno, ename, hiredate
+
+-- 1) Подчеркнем строки, которые, потенциально, необходимо вывести
+-- 2) Выделим те поля, которые необходимо вывести
+-- а именно, по тексту из задания "deptno, ename, hiredate"
+
+-- Тут есть как минимум два варианта решения данной задачи.
+
+-- Вариант - 1 - С подзапросами
+SELECT deptno, ename, hiredate
+    FROM scott.emp
+    WHERE (deptno, hiredate) in
+        (SELECT deptno, max(hiredate)
+            FROM scott.emp
+            GROUP BY deptno)
+            ORDER BY hiredate DESC;
+
+-- Вариант - 2 - С аналитическими функциями
+SELECT deptno, enam, hiredate
+    FROM (
+        SELECT deptno, ename, hiredate,
+        row_number() over(partition by
+        deptno order by hiredate desc) rnk
+        FROM scott.emp
+    )
+    WHERE rnk = 1
+    ORDER BY hiredate DESC;
+    
