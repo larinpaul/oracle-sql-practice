@@ -118,4 +118,25 @@ SELECT deptno, enam, hiredate
     )
     WHERE rnk = 1
     ORDER BY hiredate DESC;
+
+
+-- 2024 03 15
+
+-- Задание 2
+-- Найдите все отделы, не имеющие служащих используя подзапрос.
+-- Вывести в результирующие столбцы: deptno, dname
+
+-- Вариант - 1
+SELECT deptno, dname
+    FROM scoot.dept
+    WHERE deptno not in
+        (SELLECT deptno FROM scott.emp)
+
+-- Вариант - 2
+SELECT deptno, dname
+    FROM scott.dept d
+    WHERE not exist
+        (SELECT 1 FROM scott.emp e WHERE d.deptno = e.deptno)
+
+
     
