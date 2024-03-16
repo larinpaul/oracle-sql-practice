@@ -139,4 +139,46 @@ SELECT deptno, dname
         (SELECT 1 FROM scott.emp e WHERE d.deptno = e.deptno)
 
 
+-- 2024 03 16
+
+
+-- Задание 1
+-- Выбрать те отделы, где число сотрудников больше трех и средняя зарплата больше средней
+-- зарплаты отдела 30. Вывести в результирующие столбцы: номер отдела, средняя зарплата.
+SELECT deptno, average
+    FROM (SELECT count(*), avg(sal) average, deptno
+        FROM scott.emp
+        GROUP BY deptno
+        HAVING count(*) > 3
+            and avg(sal) > (SELECT avg(sal)
+                            FROM scott.emp
+                            WHERE deptno = 30)
+        );
+
+
+-- Задание 2
+-- Получить список сотрудников, не имеющих подчиненных.
+-- Вывести результирующие столбцы: EMPNO, ENAME, JOB, DEPTNO
+
+-- Вариант 1 (не правильный, с использованием not in)
+SELECT empno, ename, job, deptno
+    FROM scott.emp e
+    WHERE e.empno not in (SELECT e_in.mgr
+                                FROM scott.emp e_in);
+
+-- Вариант - 2 (правильный, с использованием NOT EXISTS)
+SELECT empno, ename, job, deptno
+    FROM scott.emp e
+    WHERE NOT EXISTS
+            (SELECT 1
+                FROM scott.emp e_in
+                WHERE e.empno = e_in.mgr);
+    
+-- Вариант - 3 (альтернативный, нетривиальный, необязательно оптимальный, но интересный)
+SELECT empno, ename, job, deptno
+    FROM scott.emp
+    minus
+    SELECT e.empno, e.ename, e.job, e.deptno
+    FROM scott.emp e, scott.emp e2
+    WHERE e.empno = e2.mgr
     
