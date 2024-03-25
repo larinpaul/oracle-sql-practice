@@ -181,4 +181,122 @@ SELECT empno, ename, job, deptno
     SELECT e.empno, e.ename, e.job, e.deptno
     FROM scott.emp e, scott.emp e2
     WHERE e.empno = e2.mgr
+
+
+
+-- 2024 03 25
+
+-- Собеседование SQL (Часть 5)
+-- https://youtu.be/Q6OdYT9VZOY?list=PLJXRI1dijmWC_TsUe1Tr9bMyjtyvG-F6X
+
+-- Задание 1
+
+-- Необходимо написать запрос, который позволит понять, идентичны ли данные в
+-- двух таблицах. Порядок хранения данных в таблицах значения не имеет
+
+-- Пример данных:
+
+-- T1:
+-- a b
+-- 1 1
+-- 2 2
+-- 2 2
+-- 3 3
+-- 4 4
+
+-- T2:
+-- a b
+-- 1 1
+-- 2 2
+-- 3 3
+-- 3 3
+-- 4 4
+
+
+-- Решение - Вариант 1 (НО он может быть неверным)
+SELECT sum(a)sm_a, sum(b) sm_b, 'tmp1' as fld
+    FROM t1
+    UNION ALL
+    SELECT sum(a), sum(b), 'tmp2' as fld
+    FROM t2;
+
+
+-- Решение - Вариант 2
+-- Немного сложнее, но вместе с этим чуть интереснее
+-- Необходимо проверить индентичность с двух сторон
+select a, b, count(1) cnt from t1 group by a, b
+minus
+select a, b, count(1) cnt from t2 group by a, b;
+
+select a, b, count(1) cnt from t2 group by a, b
+minus
+select a, b, count(1) cnt from t1 group by a, b;
+-- minus вычитает значения первое из второго...
+
+
+-- Задание 2
+-- Имеется таблица без первичного ключа. Известно, что в таблице
+-- имеется задвоение данных.
+-- Необходимо удалить дубликаты из таблицы
+
+-- Пример данных:
+-- a b
+-- 1 1
+-- 2 2
+-- 2 2
+-- 3 3
+-- 3 3
+-- 3 3
+
+-- Требумый результат:
+-- a b
+-- 1 1
+-- 2 2
+-- 3 3
+
+-- Решение
+SELECT
+    FROM t
+    WHERE rowid in (
+        SELECT rowid
+            FROM
+                (
+                    select a, b, rowid,
+                        row_number() over(partition by a, b
+                            order by rowid) rnk
+                    from t
+                )
+        WHERE rnk > 1           
+    );
+
+
+-- Задание 3 (Со звездочкой! Нужно хорошенько подумать, как его решать)
+-- Имеется таблица с данными по платежным документам.
+-- Необходимо написать запрос, который выведет все документы того типа,
+-- которого за все время было по сумме больше всего.
+-- Если таких типов несколько, то вывести все такие типы.
+-- Для каждой строки результата вывести промежуточную сумму 
+-- платежей данного типа от самого раннего до текущего платежа включительно.
+
+-- Решение - часть 1
+select p.*, sum(pay_sum) over
+            (partition by pay_type) ps
+    from payments p
+
+-- Решение - часть 2
+SELECT tmp.id, pay_type, pay_date, pay_sum, ps,
+        dense_rank() over (order by ps desc) rown
+    FROM
+        (SELECT p.*, sum(pay_sum)
+            over (partition by pay_type) ps
+            FROM scott.payments p) tmp
+
+-- Решение - итог
+SELECT id, pay_type, pay_date, pay_sum, sum (pay_sum) (over partition by pay_type order by pay_date) sm
+    FROM (SELECT tmp.id, pay_type, pay_date, pay_sum, ps, dense_rank() over (order by ps desc) rown
+        FROM (SELECT p.*, sum(pay_sum) over (partition by pay_type) ps
+            FROM scott.payments p) tmp
+    )
+WHERE rown = 1
+    ORDER BY id;
     
