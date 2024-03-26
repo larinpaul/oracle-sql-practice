@@ -300,3 +300,101 @@ SELECT id, pay_type, pay_date, pay_sum, sum (pay_sum) (over partition by pay_typ
 WHERE rown = 1
     ORDER BY id;
     
+
+
+-- 2024 03 26
+
+-- Собеседование по SQL (Часть 6)
+
+-- Задание 1
+
+-- -- Имеется база данных со следующей структурой:
+
+-- Salespeople
+-- salespeople_id -> Orders.salespeople_id
+-- salespeople_name
+-- salespeople_comm
+-- salespeople_city
+
+-- Orders
+-- orders_id
+-- orders_count
+-- orders_date
+-- customers_id
+-- salespeople_id
+
+-- Customers
+-- customers_id -> Orders.customers_id
+-- customers_name
+-- customers_city
+-- customers_rating
+
+-- Написать запрос на SQL,
+-- выводящий все заказы, оформленные продавцом Петровым на клиентов из города Москвы
+
+-- Решение
+SELECT ord.*
+    FROM salespeople sp
+        JOIN orders ord
+        ON s.salespeople_id = ord.salespeople_id
+        WHERE customers_id in (SELECT customers_id
+                                FROM customers cm
+                                WHERE lower(com.customers_city) = 'москва')
+        AND lower(sp.salespeople_name) = 'петров';
+
+
+-- Задание 2
+
+-- Используя Базу Данных из предыдущего задания, написать на понятном пользователю
+-- языке, какие данные возвращает приведенный ниже SQL-запрос:
+SELECT c.c_name
+    FROM customers c
+    WHERE c.rating > (SELECT avg(c.rating)
+                        FROM customers c
+                        WHERE c.c_city='Санкт-Петербург')
+        AND c.c_id in (SELECT o.c_id
+                        FROM orders o
+                        WHERE o.o_date BETWEEN sysdate-31 and sysdate)
+                            
+-- Решение - Часть 1
+-- Разбиваем наш запрос мысленно на 3 части.
+-- Будем описывать 1ю и 2ю части независимо.
+SELECT c.c_name
+    FROM customers c
+    WHERE c.rating > (SELECT avg(c.rating)
+                        FROM customers c
+                        WHERE c.c_city='Санкт-Петербург')
+        AND c.c_id in (SELECT o.c_id
+                        FROM orders o
+                        WHERE o.o_date BETWEEN sysdate-31 and sysdate)
+                                            -- systdate-31 это на 31 день назад
+-- Решение - Часть 2
+
+-- 1я часть
+SELECT avg(c.rating)
+    FROM customers c
+    WHERE c.c_city='Санкт-Петербург'
+
+-- Получаем средний арифметический рейтинг среди всех покупателей по городу Санкт-Петербург.
+-- По сути средний показатель по городу
+
+-- 2я часть
+SELECT o.c_id
+    FROM orders o
+    WHERE o.o_date BETWEEN sysdate-31 and sysdate
+
+-- Решение - итог
+SELECT c.c_name
+    FROM customers c
+    WHERE c.rating > (SELECT avg(c.rating)
+                        FROM customers c
+                        WHERE c.c_city='Санкт-Петербург')
+            AND c.c_id in (SELECT o.c_id
+                            FROM orders o
+                            WHERE o.o_date BETWEEN sysdate-31 and sysdate)
+
+-- Этим запросом мы выводим всех покупаетелей,
+-- рейтинг которых боьтше среднего уровня по Санкт-Петербургу,
+-- среди тех покупателей, которые офрмили заказы на последний 31 день.
+
+-- В резщультатах запросов мы получим имена покупателей.
